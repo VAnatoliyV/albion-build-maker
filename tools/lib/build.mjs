@@ -48,3 +48,22 @@ export function slotOf(raw, section) {
     return { food: 'food', potions: 'potion' }[raw['@shopsubcategory1']] ?? null;
   return null;
 }
+
+export function tierAffixes(refByTier) {
+  const base = baseName(Object.values(refByTier));
+  const out = {};
+  for (const [t, name] of Object.entries(refByTier)) out[t] = name.replace(base, '');
+  return out;
+}
+
+export function stripTier(namesByTier, affixes) {
+  const counts = new Map();
+  for (const [t, name] of Object.entries(namesByTier)) {
+    const a = affixes[t];
+    const base = a && name.includes(a) ? name.replace(a, '').trim() : name;
+    counts.set(base, (counts.get(base) ?? 0) + 1);
+  }
+  let best = '', n = 0;
+  for (const [base, c] of counts) if (c > n) { best = base; n = c; }
+  return best;
+}

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { spellListOf, groupSpells, baseName, slotOf } from '../tools/lib/build.mjs';
+import { spellListOf, groupSpells, baseName, tierAffixes, stripTier, slotOf } from '../tools/lib/build.mjs';
 
 const raw = (id, list, extra = {}) => ({ '@uniquename': id, craftingspelllist: list, ...extra });
 const items = new Map([
@@ -53,4 +53,23 @@ test('slotOf', () => {
   assert.equal(slotOf({ '@shopsubcategory1': 'food' }, 'consumableitem'), 'food');
   assert.equal(slotOf({ '@shopsubcategory1': 'potions' }, 'consumableitem'), 'potion');
   assert.equal(slotOf({ '@shopsubcategory1': 'fish' }, 'consumableitem'), null);
+});
+
+const swordRu = { 4: 'Палаш (знаток)', 5: 'Палаш (эксперт)', 6: 'Палаш (мастер)', 7: 'Палаш (магистр)', 8: 'Палаш (старейшина)' };
+const swordEn = { 4: "Adept's Broadsword", 5: "Expert's Broadsword", 6: "Master's Broadsword", 7: "Grandmaster's Broadsword", 8: "Elder's Broadsword" };
+
+test('tierAffixes learns tier words from a reference item', () => {
+  assert.deepEqual(tierAffixes(swordRu), { 4: ' (знаток)', 5: ' (эксперт)', 6: ' (мастер)', 7: ' (магистр)', 8: ' (старейшина)' });
+  assert.deepEqual(tierAffixes(swordEn)[7], "Grandmaster's ");
+});
+
+test('stripTier: unique T8 name loses to majority', () => {
+  const aff = tierAffixes(swordRu);
+  assert.equal(stripTier({ 4: 'Большой огненный посох (знаток)', 5: 'Большой огненный посох (эксперт)', 6: 'Большой огненный посох (мастер)', 7: 'Большой огненный посох (магистр)', 8: 'Гнев Vendetta' }, aff), 'Большой огненный посох');
+});
+
+test('stripTier: single tier item and per-tier dishes', () => {
+  assert.equal(stripTier({ 4: 'Гигантский олень (знаток)' }, tierAffixes(swordRu)), 'Гигантский олень');
+  assert.equal(stripTier({ 4: "Grandmaster's Grandmaster's Hat" }, tierAffixes(swordEn)), "Grandmaster's Grandmaster's Hat");
+  assert.equal(stripTier({ 1: 'Суп из илистых моллюсков', 3: 'Суп из грязевых моллюсков' }, tierAffixes(swordRu)), 'Суп из илистых моллюсков');
 });
