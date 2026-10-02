@@ -129,16 +129,18 @@ await mkdir('data', { recursive: true });
 await mkdir('icons/items', { recursive: true });
 await mkdir('icons/spells', { recursive: true });
 
-async function itemIcon(i) {
-  for (const src of i.srcs) if (await icon(`${RENDER}item/${src}.png`, `icons/items/${i.id}.webp`, 128)) return true;
-  return false;
-}
+const tierIcons = items.flatMap(i => i.srcs.map(src => ({ i, src })));
+const gotIcon = new Set();
 const missing = await pool([
-  ...items.map(i => ({ name: i.id, go: () => itemIcon(i) })),
+  ...tierIcons.map(({ i, src }) => ({ name: src, go: async () => {
+    const ok = await icon(`${RENDER}item/${src}.png`, `icons/items/${src}.webp`, 128);
+    if (ok) gotIcon.add(src);
+    return ok;
+  } })),
   ...[...usedSpells].map(s => ({ name: s, go: () => icon(`${RENDER}spell/${s}.png`, `icons/spells/${s}.webp`, 64) })),
 ], 8);
-const noIcon = new Set(missing);
-const kept = items.filter(i => !noIcon.has(i.id));
+for (const i of items) i.tiers = i.tiers.filter((t, k) => gotIcon.has(i.srcs[k]));
+const kept = items.filter(i => i.tiers.length);
 
 const today = new Date().toISOString().slice(0, 10);
 await writeFile('data/items.json', JSON.stringify({ v: today, cats: catNames, items: kept.map(({ srcs, ...i }) => i) }));

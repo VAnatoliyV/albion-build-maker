@@ -75,3 +75,5 @@ export function sanitize(build, itemsById) {
   if (main?.two) delete out.slots.offhand;
   return { build: out, dropped };
 }
+
+export const iconOf = (id, tier) => `icons/items/T${tier}_${id}.webp`;

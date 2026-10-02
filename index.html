@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Albion Build Maker</title>
+<meta name="description" content="Собери билд Albion Online: вещи, тир, зачарование, качество, навыки — и получи картинку и текст для Discord.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header>
+  <h1 id="h1"></h1>
+  <input id="name" maxlength="60" autocomplete="off">
+  <select id="lang"><option value="ru">RU</option><option value="en">EN</option></select>
+</header>
+<div id="banner" hidden></div>
+<main>
+  <section class="build">
+    <div id="slots"></div>
+    <div id="spells"></div>
+  </section>
+  <section class="out">
+    <div class="textbox">
+      <textarea id="txt" readonly rows="6"></textarea>
+      <div class="actions"><button id="copytxt"></button><button id="link"></button></div>
+    </div>
+    <div class="imgbox">
+      <div id="preview"></div>
+      <div class="actions"><button id="dl"></button><button id="copy"></button></div>
+    </div>
+  </section>
+</main>
+<dialog id="picker">
+  <div class="ph"><input id="q" autocomplete="off"><button id="pclose" aria-label="close">✕</button></div>
+  <div id="cats"></div>
+  <div id="list"></div>
+  <div class="opts">
+    <label><span data-t="tier"></span> <select id="tier"></select></label>
+    <label><span data-t="ench"></span> <select id="ench"></select></label>
+    <label id="qwrap"><span data-t="quality"></span> <select id="qual"></select></label>
+    <button id="pclear"></button>
+  </div>
+</dialog>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

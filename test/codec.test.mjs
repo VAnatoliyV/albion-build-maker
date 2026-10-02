@@ -53,3 +53,8 @@ test('defaultSpells takes first of each list', () => {
   assert.deepEqual(defaultSpells(claymore), { q: 'A', w: 'C', e: 'D', p: 'P1' });
   assert.deepEqual(emptyBuild(), { name: '', slots: {} });
 });
+
+test('iconOf points to the per-tier icon', async () => {
+  const { iconOf } = await import('../js/codec.js');
+  assert.equal(iconOf('2H_CLAYMORE', 8), 'icons/items/T8_2H_CLAYMORE.webp');
+});
