@@ -9,9 +9,12 @@ const RENDER = 'https://render.albiononline.com/v1/';
 const EQUIP = new Set(['head', 'armor', 'shoes', 'mainhand', 'offhand', 'cape', 'bag']);
 const exists = p => access(p).then(() => true, () => false);
 
+// По умолчанию дампы качаются заново; --cached берёт уже скачанные из .cache/.
+const CACHED = process.argv.includes('--cached');
+
 async function dump(name) {
   const file = `.cache/${name.replace(/\//g, '_')}`;
-  if (!(await exists(file))) {
+  if (!CACHED || !(await exists(file))) {
     await mkdir('.cache', { recursive: true });
     const r = await fetch(DUMPS + name);
     if (!r.ok) throw new Error(`${name}: HTTP ${r.status}`);
@@ -130,6 +133,7 @@ await mkdir('icons/items', { recursive: true });
 await mkdir('icons/spells', { recursive: true });
 
 const tierIcons = items.flatMap(i => i.srcs.map(src => ({ i, src })));
+const enchIcons = items.flatMap(i => i.srcs.flatMap(src => Array.from({ length: i.ench }, (_, k) => `${src}@${k + 1}`)));
 const gotIcon = new Set();
 const missing = await pool([
   ...tierIcons.map(({ i, src }) => ({ name: src, go: async () => {
@@ -137,6 +141,7 @@ const missing = await pool([
     if (ok) gotIcon.add(src);
     return ok;
   } })),
+  ...enchIcons.map(src => ({ name: src, go: () => icon(`${RENDER}item/${src}.png`, `icons/items/${src}.webp`, 128) })),
   ...[...usedSpells].map(s => ({ name: s, go: () => icon(`${RENDER}spell/${s}.png`, `icons/spells/${s}.webp`, 64) })),
 ], 8);
 for (const i of items) i.tiers = i.tiers.filter((t, k) => gotIcon.has(i.srcs[k]));

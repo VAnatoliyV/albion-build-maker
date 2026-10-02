@@ -31,7 +31,7 @@ export function openPicker({ slot, current, db, index, last, onPick, onUpdate, o
   const renderList = () => {
     const found = search(index, $('q').value, slot, cat);
     $('list').innerHTML = found.length
-      ? found.map(i => `<button class="it${i.id === current?.id ? ' cur' : ''}" data-id="${i.id}"><img loading="lazy" src="${iconOf(i.id, i.tiers.includes(+$('tier').value) ? +$('tier').value : i.tiers.at(-1))}" alt=""><span>${nameOf(i.n)}</span></button>`).join('')
+      ? found.map(i => `<button class="it${i.id === current?.id ? ' cur' : ''}" data-id="${i.id}"><img loading="lazy" src="${iconOf(i.id, i.tiers.includes(+$('tier').value) ? +$('tier').value : i.tiers.at(-1), Math.min(+$('ench').value, i.ench))}" alt=""><span>${nameOf(i.n)}</span></button>`).join('')
       : `<p>${t('empty')}</p>`;
   };
 
@@ -54,7 +54,7 @@ export function openPicker({ slot, current, db, index, last, onPick, onUpdate, o
     onPick(db.items.get(b.dataset.id), opts());
     dlg.close();
   });
-  for (const id of ['tier', 'ench', 'qual']) on($(id), 'change', () => { onUpdate(opts()); if (id === 'tier') renderList(); });
+  for (const id of ['tier', 'ench', 'qual']) on($(id), 'change', () => { onUpdate(opts()); if (id !== 'qual') renderList(); });
   on($('pclear'), 'click', () => { onClear(); dlg.close(); });
   on($('pclose'), 'click', () => dlg.close());
   on(dlg, 'close', () => ctl.abort());

@@ -8,7 +8,10 @@ const NEED = { mainhand: ['q', 'w', 'e', 'p'], armor: ['a', 'p'], head: ['a', 'p
 for (const it of db.items) {
   if (ids.has(it.id)) errors.push(`дубль id ${it.id}`);
   ids.add(it.id);
-  for (const t of it.tiers) if (!(await ok(`icons/items/T${t}_${it.id}.webp`))) errors.push(`нет иконки T${t}_${it.id}`);
+  for (const t of it.tiers) for (let e = 0; e <= it.ench; e++) {
+    const f = `T${t}_${it.id}${e ? '@' + e : ''}`;
+    if (!(await ok(`icons/items/${f}.webp`))) (e ? warns : errors).push(`нет иконки ${f}`);
+  }
   if (!it.n['EN-US']) errors.push(`нет имени ${it.id}`);
   for (const k of NEED[it.slot] ?? []) if (!it.sp[k]?.length) warns.push(`${it.id}: пусто ${k}`);
   for (const s of Object.values(it.sp).flat()) if (!spells[s]) errors.push(`${it.id}: навык ${s} не в spells.json`);

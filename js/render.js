@@ -3,9 +3,8 @@ import { iconOf } from './codec.js';
 
 const CELL = 84, GAP = 8, PAD = 20, TITLE = 52, FOOT = 26, SP = 34, SCALE = 2;
 const GRID = [['bag', 'head', 'cape'], ['mainhand', 'armor', 'offhand'], ['potion', 'shoes', 'food'], [null, 'mount', null]];
-const SPELL_ROWS = [['mainhand', ['q', 'w', 'e', 'p']], ['armor', ['a', 'p']], ['head', ['a', 'p']], ['shoes', ['a', 'p']], ['cape', ['p']]];
+const SPELL_ROWS = [['mainhand', ['q', 'w', 'e', 'p']], ['armor', ['a', 'p']], ['head', ['a', 'p']], ['shoes', ['a', 'p']], ['cape', ['p']], ['bag', ['p']], ['mount', ['p']]];
 const QCOLOR = [null, null, '#8d8d8d', '#b0713a', '#c9d1d9', '#e2b13c'];
-const ECOLOR = [null, '#3fbf5f', '#3f8fdf', '#b37bff', '#e2b13c'];
 const SITE = location.host + location.pathname.replace(/index\.html$/, '');
 const FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
 
@@ -36,12 +35,6 @@ function cell(ctx, x, y, slot, data, image) {
   }
   if (image) ctx.drawImage(image, x + 3, y + 3, CELL - 6, CELL - 6);
   else { ctx.fillStyle = '#5c5246'; ctx.font = `10px ${FONT}`; ctx.textAlign = 'center'; ctx.fillText(data.id.slice(0, 12), x + CELL / 2, y + CELL / 2); }
-  ctx.shadowColor = '#000'; ctx.shadowBlur = 2;
-  for (let d = 0; d < data.ench; d++) {
-    ctx.beginPath(); ctx.arc(x + 10 + d * 9, y + CELL - 10, 3, 0, Math.PI * 2);
-    ctx.fillStyle = ECOLOR[data.ench]; ctx.fill();
-  }
-  ctx.shadowBlur = 0;
 }
 
 export async function renderBuild(build, db) {
@@ -63,7 +56,7 @@ export async function renderBuild(build, db) {
   ctx.fillText(build.name || 'Albion build', PAD, 34, W - PAD * 2);
 
   const imgs = {};
-  await Promise.all(Object.entries(build.slots).map(async ([s, x]) => { imgs[s] = await img(iconOf(x.id, x.tier)); }));
+  await Promise.all(Object.entries(build.slots).map(async ([s, x]) => { imgs[s] = await img(iconOf(x.id, x.tier, x.ench)); }));
   const spImgs = {};
   await Promise.all(rows.flatMap(r => r.keys.map(async k => { spImgs[r.x.sp[k]] = await img(`icons/spells/${r.x.sp[k]}.webp`); })));
 

@@ -17,8 +17,19 @@ function score(keys, q, words) {
   return best;
 }
 
+// Слова тира из игровых названий («Клеймор (знаток)», «Elder's Claymore») — в индексе их нет.
+const TIER_WORDS = new Set(('неопытныи неопытного новичок новичка странник странника знаток знатока эксперт эксперта ' +
+  'мастер мастера магистр магистра стареишина стареишины beginner beginners novice novices journeyman journeymans ' +
+  'adept adepts expert experts master masters grandmaster grandmasters elder elders s').split(' '));
+
+function cleanQuery(query) {
+  const raw = String(query).trim().replace(/^t[1-8]_/i, '').replace(/@[0-4]$/, '');
+  const words = norm(raw).split(' ').filter(w => !TIER_WORDS.has(w));
+  return words.length ? words.join(' ') : norm(raw);
+}
+
 export function search(index, query, slot, cat = null, limit = 300) {
-  const q = norm(query);
+  const q = cleanQuery(query);
   const words = q.split(' ');
   const out = [];
   index.forEach((e, i) => {

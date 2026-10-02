@@ -8,8 +8,7 @@ import { renderBuild, toBlob } from './render.js';
 const $ = id => document.getElementById(id);
 const LAYOUT = ['bag', 'head', 'cape', 'mainhand', 'armor', 'offhand', 'potion', 'shoes', 'food', null, 'mount', null];
 const QCOLOR = [null, null, '#8d8d8d', '#b0713a', '#c9d1d9', '#e2b13c'];
-const ECOLOR = [null, '#3fbf5f', '#3f8fdf', '#b37bff', '#e2b13c'];
-const SPELL_SLOTS = ['mainhand', 'armor', 'head', 'shoes', 'cape'];
+const SPELL_SLOTS = ['mainhand', 'armor', 'head', 'shoes', 'cape', 'bag', 'mount'];
 
 let db, index, build = emptyBuild();
 let last = { tier: 8, ench: 0, quality: 1 };
@@ -33,11 +32,12 @@ function restore() {
   let raw = null;
   const m = /^#b=(.+)$/.exec(location.hash);
   if (m) raw = decode(m[1]);
-  if (!raw) try { raw = decode(localStorage.getItem('abm_build') || ''); } catch {}
+  else try { raw = decode(localStorage.getItem('abm_build') || ''); } catch {}
   const { build: b, dropped } = sanitize(raw ?? emptyBuild(), db.items);
   build = b;
-  if (m && (!raw || dropped)) { $('banner').hidden = false; $('banner').textContent = t('broken') + (raw ? dropped : '—'); }
-  if (dropped) history.replaceState(null, '', '#b=' + encode(build));
+  $('banner').hidden = !(m && (!raw || dropped));
+  if (!$('banner').hidden) $('banner').textContent = t('broken') + (raw ? dropped : '—');
+  if (m && encode(build) !== m[1]) history.replaceState(null, '', '#b=' + encode(build));
   render();
 }
 
@@ -48,7 +48,6 @@ function onChange() {
   render();
 }
 
-const dots = n => (n ? `<span class="dots">${'<i></i>'.repeat(n).replaceAll('<i>', `<i style="background:${ECOLOR[n]}">`)}</span>` : '');
 
 function renderSlots() {
   const two = build.slots.mainhand && db.items.get(build.slots.mainhand.id)?.two;
@@ -58,9 +57,9 @@ function renderSlots() {
     const off = s === 'offhand' && two;
     const border = x && QCOLOR[x.quality] ? ` style="border-color:${QCOLOR[x.quality]}"` : '';
     const title = x ? nameOf(db.items.get(x.id).n) : t('slots')[s];
-    if (off) return `<button class="slot off" data-s="${s}"><img src="${iconOf(build.slots.mainhand.id, build.slots.mainhand.tier)}" alt=""></button>`;
+    if (off) return `<button class="slot off" data-s="${s}" disabled tabindex="-1"><img src="${iconOf(build.slots.mainhand.id, build.slots.mainhand.tier, build.slots.mainhand.ench)}" alt=""></button>`;
     return `<button class="slot" data-s="${s}" title="${title}"${border}>` +
-      (x ? `<img src="${iconOf(x.id, x.tier)}" alt="${title}">${dots(x.ench)}` : `<span class="lbl">${t('slots')[s]}</span>`) +
+      (x ? `<img src="${iconOf(x.id, x.tier, x.ench)}" alt="${title}">` : `<span class="lbl">${t('slots')[s]}</span>`) +
       '</button>';
   }).join('');
 }
@@ -109,7 +108,7 @@ async function renderPreview() {
 }
 
 $('slots').addEventListener('click', e => {
-  const b = e.target.closest('.slot'); if (!b) return;
+  const b = e.target.closest('.slot'); if (!b || b.disabled) return;
   const slot = b.dataset.s;
   openPicker({
     slot, current: build.slots[slot], db, index, last,

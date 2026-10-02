@@ -18,7 +18,8 @@ python3 -m http.server 8765
 ## Обновить данные после патча
 
 ```
-npm run fetch   # скачивает ao-bin-dumps, собирает data/ и докачивает новые иконки
+npm run fetch   # скачивает свежие ao-bin-dumps, собирает data/ и докачивает новые иконки
+                # (node tools/fetch.mjs --cached — собрать из уже скачанных дампов)
 npm run check   # проверка: у каждой вещи иконка на каждый тир, навыки на месте
 npm test
 ```

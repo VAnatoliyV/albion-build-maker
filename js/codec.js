@@ -69,11 +69,12 @@ export function sanitize(build, itemsById) {
       else { sp[key] = list[0]; if (x.sp[key] !== undefined) broken = true; }
     }
     if (broken) dropped++;
-    out.slots[k] = { id: x.id, tier: nearest(item.tiers, x.tier), ench: Math.min(x.ench, item.ench), quality: x.quality, sp };
+    const quality = k === 'food' || k === 'potion' ? 1 : x.quality;
+    out.slots[k] = { id: x.id, tier: nearest(item.tiers, x.tier), ench: Math.min(x.ench, item.ench), quality, sp };
   }
   const main = out.slots.mainhand && itemsById.get(out.slots.mainhand.id);
   if (main?.two) delete out.slots.offhand;
   return { build: out, dropped };
 }
 
-export const iconOf = (id, tier) => `icons/items/T${tier}_${id}.webp`;
+export const iconOf = (id, tier, ench = 0) => `icons/items/T${tier}_${id}${ench ? '@' + ench : ''}.webp`;

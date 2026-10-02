@@ -40,3 +40,11 @@ test('category filter', () => {
   assert.deepEqual(ids(search(idx, '', 'head', 'plate_helmet')), ['HEAD_PLATE_SET1']);
   assert.deepEqual(ids(search(idx, '', 'head', 'cloth_helmet')), []);
 });
+
+test('full in-game names and codes with tier/enchant', () => {
+  assert.deepEqual(ids(search(idx, 'Клеймор (знаток)', 'mainhand')), ['2H_CLAYMORE']);
+  assert.deepEqual(ids(search(idx, 'клеймор старейшины', 'mainhand')), ['2H_CLAYMORE']);
+  assert.deepEqual(ids(search(idx, "Elder's Claymore", 'mainhand')), ['2H_CLAYMORE']);
+  assert.deepEqual(ids(search(idx, 'T8_2H_CLAYMORE@3', 'mainhand')), ['2H_CLAYMORE']);
+  assert.deepEqual(ids(search(idx, 't4_main_sword', 'mainhand')), ['MAIN_SWORD']);
+});
