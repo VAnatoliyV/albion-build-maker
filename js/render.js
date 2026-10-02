@@ -1,10 +1,9 @@
 import { t, nameOf, LETTERS } from './i18n.js';
-import { iconOf } from './codec.js';
+import { iconOf, qualityOf } from './codec.js';
 
 const CELL = 84, GAP = 8, PAD = 20, TITLE = 52, FOOT = 26, SP = 34, SCALE = 2;
 const GRID = [['bag', 'head', 'cape'], ['mainhand', 'armor', 'offhand'], ['potion', 'shoes', 'food'], [null, 'mount', null]];
 const SPELL_ROWS = [['mainhand', ['q', 'w', 'e', 'p']], ['armor', ['a', 'p']], ['head', ['a', 'p']], ['shoes', ['a', 'p']], ['cape', ['p']], ['bag', ['p']], ['mount', ['p']]];
-const QCOLOR = [null, null, '#8d8d8d', '#b0713a', '#c9d1d9', '#e2b13c'];
 const SITE = location.host + location.pathname.replace(/index\.html$/, '');
 const FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
 
@@ -23,18 +22,20 @@ function rrect(ctx, x, y, w, h, r) {
   ctx.beginPath(); ctx.roundRect(x, y, w, h, r);
 }
 
-function cell(ctx, x, y, slot, data, image) {
+function cell(ctx, x, y, slot, data, image, frame) {
   rrect(ctx, x, y, CELL, CELL, 8);
   ctx.fillStyle = '#201b15'; ctx.fill();
-  ctx.lineWidth = data && QCOLOR[data.quality] ? 3 : 1.5;
-  ctx.strokeStyle = (data && QCOLOR[data.quality]) || '#3a3128'; ctx.stroke();
+  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = '#3a3128'; ctx.stroke();
   if (!data) {
     ctx.fillStyle = '#5c5246'; ctx.font = `11px ${FONT}`; ctx.textAlign = 'center';
     ctx.fillText(t('slots')[slot], x + CELL / 2, y + CELL - 8);
     return;
   }
-  if (image) ctx.drawImage(image, x + 3, y + 3, CELL - 6, CELL - 6);
-  else { ctx.fillStyle = '#5c5246'; ctx.font = `10px ${FONT}`; ctx.textAlign = 'center'; ctx.fillText(data.id.slice(0, 12), x + CELL / 2, y + CELL / 2); }
+  if (image) {
+    ctx.drawImage(image, x + 3, y + 3, CELL - 6, CELL - 6);
+    if (frame) ctx.drawImage(frame, x + 3, y + 3, CELL - 6, CELL - 6);
+  } else { ctx.fillStyle = '#5c5246'; ctx.font = `10px ${FONT}`; ctx.textAlign = 'center'; ctx.fillText(data.id.slice(0, 12), x + CELL / 2, y + CELL / 2); }
 }
 
 export async function renderBuild(build, db) {
@@ -56,7 +57,12 @@ export async function renderBuild(build, db) {
   ctx.fillText(build.name || 'Albion build', PAD, 34, W - PAD * 2);
 
   const imgs = {};
-  await Promise.all(Object.entries(build.slots).map(async ([s, x]) => { imgs[s] = await img(iconOf(x.id, x.tier, x.ench)); }));
+  const frames = {};
+  await Promise.all(Object.entries(build.slots).map(async ([s, x]) => {
+    imgs[s] = await img(iconOf(x.id, x.tier, x.ench));
+    const q = qualityOf(x.ench, x.quality);
+    if (q) frames[s] = await img(q);
+  }));
   const spImgs = {};
   await Promise.all(rows.flatMap(r => r.keys.map(async k => { spImgs[r.x.sp[k]] = await img(`icons/spells/${r.x.sp[k]}.webp`); })));
 
@@ -71,7 +77,7 @@ export async function renderBuild(build, db) {
       if (imgs.mainhand) { ctx.globalAlpha = 0.3; ctx.drawImage(imgs.mainhand, x + 3, y + 3, CELL - 6, CELL - 6); ctx.globalAlpha = 1; }
       return;
     }
-    cell(ctx, x, y, s, build.slots[s], imgs[s]);
+    cell(ctx, x, y, s, build.slots[s], imgs[s], frames[s]);
   }));
 
   const sx = PAD + gridW + 24;

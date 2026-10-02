@@ -78,3 +78,4 @@ export function sanitize(build, itemsById) {
 }
 
 export const iconOf = (id, tier, ench = 0) => `icons/items/T${tier}_${id}${ench ? '@' + ench : ''}.webp`;
+export const qualityOf = (ench, quality) => (quality > 1 ? `icons/quality/e${ench}_q${quality}.png` : null);

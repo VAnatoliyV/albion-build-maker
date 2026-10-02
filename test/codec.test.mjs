@@ -65,3 +65,9 @@ test('sanitize: food and potions have no quality', () => {
   const b = { name: '', slots: { food: { id: 'MEAL_OMELETTE', tier: 5, ench: 0, quality: 5, sp: {} } } };
   assert.equal(sanitize(b, db).build.slots.food.quality, 1);
 });
+
+test('qualityOf: frame overlay path, none for normal quality', async () => {
+  const { qualityOf } = await import('../js/codec.js');
+  assert.equal(qualityOf(3, 4), 'icons/quality/e3_q4.png');
+  assert.equal(qualityOf(0, 1), null);
+});

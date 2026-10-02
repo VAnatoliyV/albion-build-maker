@@ -1,4 +1,4 @@
-import { encode, decode, sanitize, defaultSpells, emptyBuild, iconOf } from './codec.js';
+import { encode, decode, sanitize, defaultSpells, emptyBuild, iconOf, qualityOf } from './codec.js';
 import { buildIndex } from './search.js';
 import { t, lang, setLang, nameOf, strings, locale, LETTERS } from './i18n.js';
 import { openPicker } from './picker.js';
@@ -7,7 +7,6 @@ import { renderBuild, toBlob } from './render.js';
 
 const $ = id => document.getElementById(id);
 const LAYOUT = ['bag', 'head', 'cape', 'mainhand', 'armor', 'offhand', 'potion', 'shoes', 'food', null, 'mount', null];
-const QCOLOR = [null, null, '#8d8d8d', '#b0713a', '#c9d1d9', '#e2b13c'];
 const SPELL_SLOTS = ['mainhand', 'armor', 'head', 'shoes', 'cape', 'bag', 'mount'];
 
 let db, index, build = emptyBuild();
@@ -55,11 +54,11 @@ function renderSlots() {
     if (!s) return '<span></span>';
     const x = build.slots[s];
     const off = s === 'offhand' && two;
-    const border = x && QCOLOR[x.quality] ? ` style="border-color:${QCOLOR[x.quality]}"` : '';
     const title = x ? nameOf(db.items.get(x.id).n) : t('slots')[s];
     if (off) return `<button class="slot off" data-s="${s}" disabled tabindex="-1"><img src="${iconOf(build.slots.mainhand.id, build.slots.mainhand.tier, build.slots.mainhand.ench)}" alt=""></button>`;
-    return `<button class="slot" data-s="${s}" title="${title}"${border}>` +
-      (x ? `<img src="${iconOf(x.id, x.tier, x.ench)}" alt="${title}">` : `<span class="lbl">${t('slots')[s]}</span>`) +
+    const q = x && qualityOf(x.ench, x.quality);
+    return `<button class="slot" data-s="${s}" title="${title}">` +
+      (x ? `<img src="${iconOf(x.id, x.tier, x.ench)}" alt="${title}">${q ? `<img class="qf" src="${q}" alt="">` : ''}` : `<span class="lbl">${t('slots')[s]}</span>`) +
       '</button>';
   }).join('');
 }
