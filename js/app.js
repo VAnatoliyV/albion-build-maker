@@ -1,4 +1,4 @@
-import { encode, decode, sanitize, defaultSpells, emptyBuild, iconOf, qualityOf } from './codec.js';
+import { encode, decode, sanitize, defaultSpells, emptyBuild, iconOf } from './codec.js';
 import { buildIndex } from './search.js';
 import { t, lang, setLang, nameOf, strings, locale, LETTERS } from './i18n.js';
 import { openPicker } from './picker.js';
@@ -55,10 +55,9 @@ function renderSlots() {
     const x = build.slots[s];
     const off = s === 'offhand' && two;
     const title = x ? nameOf(db.items.get(x.id).n) : t('slots')[s];
-    if (off) return `<button class="slot off" data-s="${s}" disabled tabindex="-1"><img src="${iconOf(build.slots.mainhand.id, build.slots.mainhand.tier, build.slots.mainhand.ench)}" alt=""></button>`;
-    const q = x && qualityOf(x.ench, x.quality);
+    if (off) return `<button class="slot off" data-s="${s}" disabled tabindex="-1"><img src="${iconOf(build.slots.mainhand.id, build.slots.mainhand.tier, build.slots.mainhand.ench, build.slots.mainhand.quality)}" alt=""></button>`;
     return `<button class="slot" data-s="${s}" title="${title}">` +
-      (x ? `<img src="${iconOf(x.id, x.tier, x.ench)}" alt="${title}">${q ? `<img class="qf" src="${q}" alt="">` : ''}` : `<span class="lbl">${t('slots')[s]}</span>`) +
+      (x ? `<img src="${iconOf(x.id, x.tier, x.ench, x.quality)}" alt="${title}">` : `<span class="lbl">${t('slots')[s]}</span>`) +
       '</button>';
   }).join('');
 }

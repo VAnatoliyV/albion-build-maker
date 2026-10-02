@@ -20,7 +20,6 @@ python3 -m http.server 8765
 ```
 npm run fetch   # скачивает свежие ao-bin-dumps, собирает data/ и докачивает новые иконки
                 # (node tools/fetch.mjs --cached — собрать из уже скачанных дампов)
-npm run quality # пересобрать рамки качества (icons/quality) — нужно, только если в игре поменялся их вид
 npm run check   # проверка: у каждой вещи иконка на каждый тир, навыки на месте
 npm test
 ```

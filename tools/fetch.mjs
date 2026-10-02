@@ -23,10 +23,10 @@ async function dump(name) {
   return JSON.parse(await readFile(file, 'utf8'));
 }
 
-async function icon(url, out, size) {
+async function icon(url, out, size, quality = 1) {
   if (await exists(out)) return true;
   for (let i = 0; i < 3; i++) {
-    const r = await fetch(`${url}?size=${size}&quality=1`).catch(() => null);
+    const r = await fetch(`${url}?size=${size}&quality=${quality}`).catch(() => null);
     if (r?.status === 404) return false;
     if (!r?.ok) { await new Promise(s => setTimeout(s, 1000 * (i + 1))); continue; }
     const tmp = out + '.png';
@@ -134,6 +134,10 @@ await mkdir('icons/spells', { recursive: true });
 
 const tierIcons = items.flatMap(i => i.srcs.map(src => ({ i, src })));
 const enchIcons = items.flatMap(i => i.srcs.flatMap(src => Array.from({ length: i.ench }, (_, k) => `${src}@${k + 1}`)));
+// Варианты качества 2–5 рисует сам render; у еды и зелий качества нет.
+const NO_QUALITY = new Set(['food', 'potion']);
+const qualityIcons = items.filter(i => !NO_QUALITY.has(i.slot)).flatMap(i => i.srcs.flatMap(src =>
+  [src, ...Array.from({ length: i.ench }, (_, k) => `${src}@${k + 1}`)].flatMap(v => [2, 3, 4, 5].map(q => ({ v, q })))));
 const gotIcon = new Set();
 const missing = await pool([
   ...tierIcons.map(({ i, src }) => ({ name: src, go: async () => {
@@ -142,8 +146,9 @@ const missing = await pool([
     return ok;
   } })),
   ...enchIcons.map(src => ({ name: src, go: () => icon(`${RENDER}item/${src}.png`, `icons/items/${src}.webp`, 128) })),
+  ...qualityIcons.map(({ v, q }) => ({ name: `${v}_q${q}`, go: () => icon(`${RENDER}item/${v}.png`, `icons/items/${v}_q${q}.webp`, 128, q) })),
   ...[...usedSpells].map(s => ({ name: s, go: () => icon(`${RENDER}spell/${s}.png`, `icons/spells/${s}.webp`, 64) })),
-], 8);
+], 16);
 for (const i of items) i.tiers = i.tiers.filter((t, k) => gotIcon.has(i.srcs[k]));
 const kept = items.filter(i => i.tiers.length);
 

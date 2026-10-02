@@ -1,2 +1,2 @@
 { "name": "albion-build-maker", "private": true, "type": "module",
-  "scripts": { "test": "node --test", "fetch": "node tools/fetch.mjs", "quality": "node tools/quality.mjs", "check": "node tools/check.mjs" } }
+  "scripts": { "test": "node --test", "fetch": "node tools/fetch.mjs", "check": "node tools/check.mjs" } }

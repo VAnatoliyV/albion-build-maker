@@ -11,6 +11,8 @@ for (const it of db.items) {
   for (const t of it.tiers) for (let e = 0; e <= it.ench; e++) {
     const f = `T${t}_${it.id}${e ? '@' + e : ''}`;
     if (!(await ok(`icons/items/${f}.webp`))) (e ? warns : errors).push(`нет иконки ${f}`);
+    if (it.slot !== 'food' && it.slot !== 'potion')
+      for (let q = 2; q <= 5; q++) if (!(await ok(`icons/items/${f}_q${q}.webp`))) warns.push(`нет иконки ${f}_q${q}`);
   }
   if (!it.n['EN-US']) errors.push(`нет имени ${it.id}`);
   for (const k of NEED[it.slot] ?? []) if (!it.sp[k]?.length) warns.push(`${it.id}: пусто ${k}`);

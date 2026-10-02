@@ -77,5 +77,5 @@ export function sanitize(build, itemsById) {
   return { build: out, dropped };
 }
 
-export const iconOf = (id, tier, ench = 0) => `icons/items/T${tier}_${id}${ench ? '@' + ench : ''}.webp`;
-export const qualityOf = (ench, quality) => (quality > 1 ? `icons/quality/e${ench}_q${quality}.png` : null);
+export const iconOf = (id, tier, ench = 0, quality = 1) =>
+  `icons/items/T${tier}_${id}${ench ? '@' + ench : ''}${quality > 1 ? '_q' + quality : ''}.webp`;
